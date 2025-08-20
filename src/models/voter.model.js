@@ -14,11 +14,11 @@ const voterSchema = new Schema(
 
         },
         aadhaarNo: {
-            type: Number,
+            type: String,
             required: true,
             unique: true
         },
-        isAdmin: {
+        role: {
             type: String,
             enum: ['voter', 'admin'],
             default: 'voter'
