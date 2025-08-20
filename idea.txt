@@ -1,0 +1,85 @@
+1. Vote Count per Candidate
+
+Use $unwind + $group + $sort
+
+Shows total votes each candidate received (leaderboard).
+
+Example pipeline stages:
+
+$unwind: "$votes" → flatten votes array
+
+$group: { _id: "$votes.option", totalVotes: { $sum: 1 } }
+
+$sort: { totalVotes: -1 }
+
+2. Voters Who Haven’t Voted Yet
+
+Use $lookup + $match
+
+Shows voters who didn’t participate in a poll.
+
+Steps:
+
+$lookup → join voters with polls on votes.userId
+
+$match → filter voters with empty votes
+
+3. Most Active Voters
+
+Use $unwind + $group + $sort + $limit
+
+Shows top voters by number of votes cast.
+
+Steps:
+
+$unwind → flatten votes
+
+$group → count votes per user
+
+$sort → descending
+
+$limit → top N users
+
+4. Vote Percentage per Option
+
+Use $unwind + $group + $project
+
+Shows percentage distribution of votes for each option.
+
+Steps:
+
+$unwind → flatten votes
+
+$group → total votes and option counts
+
+$project → calculate percentage for each option
+
+5. Multi-Poll Analytics (Advanced)
+
+Combine multiple stages for enterprise-level reporting:
+
+$match → filter active polls
+
+$unwind → flatten votes
+
+$group → count votes per option per poll
+
+$lookup → join with candidates collection
+
+$project → calculate percentages and top candidates
+
+Useful for admin dashboards and analytics.
+
+✅ Why This Stands Out
+
+Avoids manual counting in code
+
+Efficient for large datasets
+
+Shows real-world backend skills for interviews
+
+Enables analytics dashboards in your voting app
+
+If you want, I can also draw a small diagram showing these aggregation pipelines visually — it makes it super easy to remember for notes and interviews.
+
+Do you want me to do that?
