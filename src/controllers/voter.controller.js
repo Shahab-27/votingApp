@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import voter from "../models/voter.model";
-import {generateAccessToken} from "./utils/generateAccessToken.utils.js"
+import { generateAccessToken } from "./utils/generateAccessToken.utils.js"
 
 const registerUser = async (req, res, next) => {
     try {
@@ -50,45 +50,103 @@ const registerUser = async (req, res, next) => {
         })
 
     } catch (error) {
-        res.status(500).json({error: 'Internal Server Error'});
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 }
 
-const loginUser = async(req,res,next) =>{
+const loginUser = async (req, res, next) => {
     try {
-         const {aadhaarNo,password} = req.body
+        const { aadhaarNo, password } = req.body
 
-    // check aadhaarNo or password is correct
-    if(!(aadhaarNo || password)){
-        return res.status(400).json({
-            error : "Aadhaar or password is not valid"
-        })
-    }
+        // check aadhaarNo or password is correct
+        if (!(aadhaarNo || password)) {
+            return res.status(400).json({
+                error: "Aadhaar or password is not valid"
+            })
+        }
 
-    // find the user by aadhaarNo
-    const user = await voter.findOne({aadhaarNo})
+        // find the user by aadhaarNo
+        const user = await voter.findOne({ aadhaarNo })
 
-    if(!(user || isPasswordCorrect(password) )){
-        return res.send(400).json({
-            error: "Invalid AadhaarNo or password"
-        })
-    }
+        if (!(user || isPasswordCorrect(password))) {
+            return res.send(400).json({
+                error: "Invalid AadhaarNo or password"
+            })
+        }
 
-       // generate Token 
+        // generate Token 
         const payload = {
             id: user.id,
         }
         const token = generateToken(payload);
 
         // return token as response
-        res.json({token})
+        res.json({ token })
     } catch (error) {
-         res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-   
+
+}
+
+// for profile
+// Profile route
+const getProfile = async (req, res) => {
+    try {
+        const userData = req.user;
+        const userId = userData.id;
+        const user = await User.findById(userId);
+        res.status(200).json({ user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+const changePassword = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { oldPassword, newPassword } = req.body
+
+        // check old/new password is not empty
+        if (!(oldPassword || newPassword)) {
+            return res.status(400).json({
+                error: "Old or New Password filed is empty"
+            })
+        }
+        // check if user doesn't exist or password does not match
+        const user = voter.findById(userId);
+        if (!user) return res.send(400).json({
+            error: "User does not exist"
+        })
+
+        const verifyPassword = await isPasswordCorrect(password);
+
+        if (!(verifyPassword)) {
+            return res.status.json({
+                error: "Password entered is not correct "
+            })
+        }
+        // assign the pswrd to the password field
+
+        user.password = newPassword;
+        await user.save();
+
+        res.send(200).json({
+            message : "Password Updated Successfully"
+        })
+    } catch (error) {
+        res.status(500).json({
+            error : "Internal Server Error"
+        })
+    }
+
 }
 
 
 
-export { registerUser,
-    loginUser } 
+
+
+export {
+    registerUser,
+    loginUser, getProfile, changePassword
+} 
