@@ -14,7 +14,7 @@ const registerUser = async (req, res, next) => {
             })
         }
         //  aadhaar No is 12 digits
-        if (data.aadhaarNo.length === 12 && !isNaN(data.aadhaarNo)) {
+        if (data.aadhaarNo.length === 12) {
             return res.status(400).json({
                 error: "Aadhaar No already exist"
             })
@@ -29,7 +29,14 @@ const registerUser = async (req, res, next) => {
         }
 
         // create new User
+        //  option 1 : const newUser = await voter.create(data); 
         const newUser = await new voter(data).save();
+
+        // Why newUser.id instead of newUser._id ?? 
+
+        // newUser._id → MongoDB’s ObjectId type.
+
+        // newUser.id → Same value but automatically converted to a string by Mongoose.
 
         const payload = {
             id: newUser.id
@@ -47,5 +54,41 @@ const registerUser = async (req, res, next) => {
     }
 }
 
+const loginUser = async(req,res,next) =>{
+    try {
+         const {aadhaarNo,password} = req.body
 
-export { registerUser } 
+    // check aadhaarNo or password is correct
+    if(!(aadhaarNo || password)){
+        return res.status(400).json({
+            error : "Aadhaar or password is not valid"
+        })
+    }
+
+    // find the user by aadhaarNo
+    const user = await voter.findOne({aadhaarNo})
+
+    if(!(user || isPasswordCorrect(password) )){
+        return res.send(400).json({
+            error: "Invalid AadhaarNo or password"
+        })
+    }
+
+       // generate Token 
+        const payload = {
+            id: user.id,
+        }
+        const token = generateToken(payload);
+
+        // return token as response
+        res.json({token})
+    } catch (error) {
+         res.status(500).json({ error: 'Internal Server Error' });
+    }
+   
+}
+
+
+
+export { registerUser,
+    loginUser } 
