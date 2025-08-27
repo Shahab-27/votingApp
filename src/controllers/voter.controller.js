@@ -1,22 +1,24 @@
 import express from "express";
 import mongoose from "mongoose";
-import voter from "../models/voter.model";
-import { generateAccessToken } from "./utils/generateAccessToken.utils.js"
+import voter from "../models/voter.model.js";
+import generateToken from "../utils/generateToken.utils.js"
+
+
 
 const registerUser = async (req, res, next) => {
     try {
         const data = req.body;
         //  check user is not a admin
         const isAdminExist = await voter.exists({ role: "admin" })
-        if (data.role == "admin" && isAdminExist) {
+        if (data.role === "admin" && isAdminExist) {
             return res.status(400).json({
                 error: "Admin already exists"
             })
         }
         //  aadhaar No is 12 digits
-        if (data.aadhaarNo.length === 12) {
+        if (isNaN(data.aadhaarNo) || data.aadhaarNo.toString().length !== 12) {
             return res.status(400).json({
-                error: "Aadhaar No already exist"
+                error: "Aadhaar number is invalid"
             })
         }
         //  check whether the user with same aadhaarNo exist
@@ -43,7 +45,7 @@ const registerUser = async (req, res, next) => {
         }
 
         // generating token
-        const token = generateAccessToken(payload)
+        const token = generateToken(payload)
 
         res.status(200).json({
             UserData: newUser, token: token
@@ -59,7 +61,7 @@ const loginUser = async (req, res, next) => {
         const { aadhaarNo, password } = req.body
 
         // check aadhaarNo or password is correct
-        if (!(aadhaarNo || password)) {
+        if (!(aadhaarNo &&  password)) {
             return res.status(400).json({
                 error: "Aadhaar or password is not valid"
             })
@@ -68,11 +70,15 @@ const loginUser = async (req, res, next) => {
         // find the user by aadhaarNo
         const user = await voter.findOne({ aadhaarNo })
 
-        if (!(user || isPasswordCorrect(password))) {
-            return res.send(400).json({
-                error: "Invalid AadhaarNo or password"
-            })
+        if (!user) {
+            return res.status(400).json({ error: "Invalid Aadhaar or password" });
         }
+
+        const isValidPassword = await user.isPasswordCorrect(password);
+        if (!isValidPassword) {
+            return res.status(400).json({ error: "Invalid Aadhaar or password" });
+        }
+
 
         // generate Token 
         const payload = {
@@ -94,7 +100,7 @@ const getProfile = async (req, res) => {
     try {
         const userData = req.user;
         const userId = userData.id;
-        const user = await User.findById(userId);
+        const user = await voter.findById(userId).select("-password");;
         res.status(200).json({ user });
     } catch (err) {
         console.error(err);
@@ -108,21 +114,21 @@ const changePassword = async (req, res) => {
         const { oldPassword, newPassword } = req.body
 
         // check old/new password is not empty
-        if (!(oldPassword || newPassword)) {
+        if (!(oldPassword && newPassword)) {
             return res.status(400).json({
                 error: "Old or New Password filed is empty"
             })
         }
         // check if user doesn't exist or password does not match
-        const user = voter.findById(userId);
-        if (!user) return res.send(400).json({
+        const user = await voter.findById(userId);
+        if (!user) return res.status(400).json({
             error: "User does not exist"
         })
 
-        const verifyPassword = await isPasswordCorrect(password);
+        const verifyPassword = await user.isPasswordCorrect(oldPassword);
 
         if (!(verifyPassword)) {
-            return res.status.json({
+            return res.status(400).json({
                 error: "Password entered is not correct "
             })
         }
@@ -131,12 +137,12 @@ const changePassword = async (req, res) => {
         user.password = newPassword;
         await user.save();
 
-        res.send(200).json({
-            message : "Password Updated Successfully"
+        res.status(200).json({
+            message: "Password Updated Successfully"
         })
     } catch (error) {
         res.status(500).json({
-            error : "Internal Server Error"
+            error: "Internal Server Error"
         })
     }
 

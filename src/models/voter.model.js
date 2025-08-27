@@ -14,7 +14,7 @@ const voterSchema = new Schema(
 
         },
         aadhaarNo: {
-            type: String,
+            type: Number,
             required: true,
             unique: true
         },

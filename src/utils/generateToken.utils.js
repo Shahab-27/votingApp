@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const generateAccessToken = (userData) => {
+const generateToken = (userData) => {
     return  jwt.sign(
         userData,
         process.env.ACCESS_TOKEN_SECRET,
@@ -8,4 +8,4 @@ const generateAccessToken = (userData) => {
     );
 };
 
-export default generateAccessToken
+export default generateToken
