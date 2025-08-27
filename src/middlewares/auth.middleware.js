@@ -9,7 +9,7 @@ const verifyJWT = async(req,res , next)=>{
         })
     }
 
-    const token = authHeader.replace("Bearer "," ");
+    const token = authHeader.replace("Bearer ","");
     if(!token){
         return res.status(401).json({
             error : "token not found"

@@ -7,7 +7,7 @@ const router = Router();
 
 router.route('/register').post(registerUser)
 router.route('/login').post(loginUser)
-router.route('/profile').post(verifyJWT,getProfile)
+router.route('/profile').get(verifyJWT,getProfile)
 router.route('/change-password').post(verifyJWT,changePassword)
 
 export default router
