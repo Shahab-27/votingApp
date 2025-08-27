@@ -78,12 +78,12 @@ const loginUser = async (req, res, next) => {
         const user = await voter.findOne({ aadhaarNo })
 
         if (!user) {
-            return res.status(400).json({ error: "Invalid Aadhaar or password" });
+            return res.status(400).json({ error: "Invalid Aadhaar" });
         }
 
         const isValidPassword = await user.isPasswordCorrect(password);
         if (!isValidPassword) {
-            return res.status(400).json({ error: "Invalid Aadhaar or password" });
+            return res.status(400).json({ error: "Invalid Password" });
         }
 
 
