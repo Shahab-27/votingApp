@@ -52,6 +52,7 @@ const registerUser = async (req, res, next) => {
         })
 
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
@@ -61,7 +62,7 @@ const loginUser = async (req, res, next) => {
         const { aadhaarNo, password } = req.body
 
         // check aadhaarNo or password is correct
-        if (!(aadhaarNo &&  password)) {
+        if (!(aadhaarNo && password)) {
             return res.status(400).json({
                 error: "Aadhaar or password is not valid"
             })
@@ -87,8 +88,12 @@ const loginUser = async (req, res, next) => {
         const token = generateToken(payload);
 
         // return token as response
-        res.json({ token })
+        res.json({
+            message: "User Logged In successfully",
+            UserData: user
+        })
     } catch (error) {
+        console.log(error)
         res.status(500).json({ error: 'Internal Server Error' });
     }
 
