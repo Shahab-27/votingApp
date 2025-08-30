@@ -59,7 +59,7 @@ g:\votingApp
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/your-username/votingApp.git
+   git clone https://github.com/Shahab-27/votingApp.git
    cd votingApp
    ```
 
