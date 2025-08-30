@@ -1,103 +1,153 @@
 # 🗳️ Voting Application
 
-This is a backend application for a **voting system** where users can vote for candidates. It provides functionalities for **user authentication**, **candidate management**, and **secure voting**. The system uses **JWT authentication** and **role-based access control** to ensure security.
+A robust backend for a **voting system** supporting secure user authentication, candidate management, and voting operations. Built with **Node.js**, **Express**, and **MongoDB**, it features **JWT authentication**, **role-based access control**, and is structured for scalability and maintainability.
+
+---
+
+## 📁 Project Structure
+
+```
+g:\votingApp
+│
+├── src/
+│   ├── controllers/
+│   │   ├── candidates.controller.js
+│   │   └── voter.controller.js
+│   ├── DB/
+│   │   └── server.js
+│   ├── middlewares/
+│   │   └── auth.middleware.js
+│   ├── models/
+│   │   ├── candidates.model.js
+│   │   └── voter.model.js
+│   ├── routes/
+│   │   ├── candidate.routes.js
+│   │   └── voter.routes.js
+│   └── utils/
+│       └── generateToken.utils.js
+│
+├── .env.example
+├── package.json
+├── README.md
+└── ...
+```
 
 ---
 
 ## 🚀 Features
 
-- User **sign up** and **login** with **Aadhar Card Number** and **Password**
-- Users can **view the list of candidates**
-- Users can **vote for a candidate** *(only once)*
-- Admins can **add**, **update**, and **delete** candidates
-- Admins **cannot vote**
-- **JWT-based authentication** for secure APIs
-- *(Planned)* Upload **party logos**, **candidate photos**, and **voter photos** using **Multer + Cloudinary**
-- *(Planned)* Docker integration and production deployment
+- **User Registration & Login** (Aadhar Card Number & Password)
+- **JWT Authentication** & **Role-based Access Control**
+- **Candidate Management** (CRUD for Admins)
+- **Voting** (Users can vote only once; Admins cannot vote)
+- **View Candidates & Vote Counts**
+- **Planned:** Image uploads (Multer + Cloudinary), Dockerization, Production deployment
 
 ---
 
-## 🛠️ Technologies Used
+## 🛠️ Technologies
 
-- **Node.js** - Backend runtime
-- **Express.js** - Web framework
-- **MongoDB** - Database
-- **Mongoose** - MongoDB ODM
-- **JSON Web Token (JWT)** - Authentication
-- **Multer** *(Planned)* - Image uploads
-- **Cloudinary** *(Planned)* - Image storage
-- **Docker** *(Planned)* - Containerization
+- **Node.js** / **Express.js**
+- **MongoDB** / **Mongoose**
+- **JWT** for authentication
+- **Multer** & **Cloudinary** *(Planned)*
+- **Docker** *(Planned)*
 
 ---
 
-## 📦 Installation
+## ⚙️ Setup & Installation
 
-### 1️⃣ Clone the repository:
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/your-username/votingApp.git
+   cd votingApp
+   ```
 
+2. **Install dependencies:**
+   ```sh
+   npm install
+   ```
 
+3. **Configure environment variables:**
+   - Copy `.env.example` to `.env` and fill in your values:
+     ```
+     PORT=8000
+     MONGODB_URI=your_mongodb_connection_string
+     JWT_SECRET=your_jwt_secret
+     ```
 
-
-
-
-The server will start at: **http://localhost:8000**
+4. **Start the server:**
+   ```sh
+   npm start
+   ```
+   The server runs at: [http://localhost:8000](http://localhost:8000)
 
 ---
 
 ## 🔑 API Endpoints
 
-### **Authentication**
-| Method | Endpoint               | Description                   | Access |
-|--------|------------------------|-------------------------------|--------|
-| POST   | `/registerCandidate`   | Register a new candidate/user | Public |
-| POST   | `/loginCandidate`      | Login with Aadhar & password  | Public |
+### Authentication
+
+| Method | Endpoint             | Description                   | Access  |
+|--------|----------------------|-------------------------------|---------|
+| POST   | `/registerCandidate` | Register a new user/candidate | Public  |
+| POST   | `/loginCandidate`    | Login with Aadhar & password  | Public  |
 
 ---
 
-### **User Profile**
-| Method | Endpoint     | Description       | Access |
-|--------|-------------|-------------------|--------|
-| GET    | `/profile`  | Get user profile  | User   |
+### User Profile
+
+| Method | Endpoint    | Description      | Access |
+|--------|-------------|------------------|--------|
+| GET    | `/profile`  | Get user profile | User   |
 
 ---
 
-### **Candidates**
-| Method | Endpoint          | Description             | Access |
-|--------|-------------------|-------------------------|--------|
-| GET    | `/allCandidates`  | Get list of candidates  | Public |
-| PUT    | `/:candidateID`   | Update candidate        | Admin  |
-| DELETE | `/:candidateID`   | Delete candidate        | Admin  |
+### Candidates
+
+| Method | Endpoint              | Description             | Access |
+|--------|-----------------------|-------------------------|--------|
+| GET    | `/allCandidates`      | List all candidates     | Public |
+| POST   | `/addCandidate`       | Add a candidate         | Admin  |
+| PUT    | `/update/:candidateID`| Update candidate        | Admin  |
+| DELETE | `/delete/:candidateID`| Delete candidate        | Admin  |
 
 ---
 
-### **Voting**
-| Method | Endpoint               | Description            | Access |
-|--------|------------------------|------------------------|--------|
-| GET    | `/vote/:candidateID`   | Vote for a candidate   | User   |
-| GET    | `/vote/count`          | Get total vote counts  | Public |
+### Voting
+
+| Method | Endpoint                | Description            | Access |
+|--------|-------------------------|------------------------|--------|
+| POST   | `/vote/:candidateID`    | Vote for a candidate   | User   |
+| GET    | `/vote/count`           | Get total vote counts  | Public |
 
 ---
 
+## 🧩 Environment Variables
+
+Create a `.env` file in the root with:
+
+```
+PORT=8000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+```
+
+---
+
+## 🛡️ Security
+
+- **Passwords** are hashed before storage.
+- **JWT** tokens secure all protected endpoints.
+- **Role-based access** ensures only admins can manage candidates.
 
 ---
 
 ## 🛠️ Upcoming Features
 
 - Upload **candidate logos**, **party symbols**, and **voter profile photos**
-- Use **Multer + Cloudinary** for image storage
-- Docker support for containerized deployment
-- Deploy the project to **Render / Vercel / AWS**
+- **Multer + Cloudinary** for image storage
+- **Docker** support for containerized deployment
+- Production deployment (Render / Vercel / AWS)
 
 ---
-
-## 📜 License
-
-This project is licensed under the **MIT License**.
-
----
-
-## 👨‍💻 Author
-
-**Shahab Fardeen**  
-🔗 [GitHub](https://github.com/Shahab-72)
-
-
