@@ -22,7 +22,7 @@ const candidateSchema = new Schema({
     },
     votes: [
         {
-            user: {
+            voter: {
                 type: Schema.Types.ObjectId,
                 ref: voter
             },
