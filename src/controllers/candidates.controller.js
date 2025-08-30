@@ -122,20 +122,44 @@ const giveVote = async (req, res) => {
         voterData.isVoted = true;
         await voterData.save()
 
-        CandidateData.votes.push({voters : voterId})
+        CandidateData.votes.push({ voters: voterId })
         CandidateData.voteCount++;
 
-        await CandidateData.save(); 
+        await CandidateData.save();
 
-        return res.status(200).json({ 
-            message: 'Vote recorded successfully' 
+        return res.status(200).json({
+            message: 'Vote recorded successfully'
         });
 
     } catch (error) {
         res.status(500).json({
-            error : "Internal server Error"
+            error: "Internal server Error"
         })
     }
+}
 
+const countVote = async (req, res) => {
+    try {
+        const candidateId = candidate.findById(req.user.id).sort({ voteCount: 'desc' });
+
+        if (!candidateId) {
+            return res.send(400).json({
+                error: "Candidate not found"
+            })
+        }
+
+        const voterRecord = candidate.map((val) => {
+            return {
+                Name: val.name,
+                Party: val.party,
+                Count: val.voteCount
+            }
+        })
+
+        return res.status(200).json(voteRecord);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 
 }
