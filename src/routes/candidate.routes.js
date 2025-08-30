@@ -12,6 +12,6 @@ router.route('/profile').get(verifyJWT,getProfile)
 router.route('/:candidateID').put(verifyJWT,modifyCandidate)
 router.route('/:candidateID').delete(verifyJWT,deleteCandidate)
 router.route('/vote/:candidateID').get(verifyJWT,giveVote)
-router.route('/vote/count').get(countVote)countVote
-
+router.route('/vote/count').get(countVote)
+router.route('allCandidates').get(getAllCandidates)
 export default router
