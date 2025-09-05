@@ -4,8 +4,8 @@
 import express from "express"
 import cors from "cors"
 import cookieParser  from "cookie-parser"
-import router from "./src/routes/voter.routes.js";
-
+import voterRouter from "./src/routes/voter.routes.js";
+import candidatesRouter from "./src/routes/candidate.routes.js";
 const app = express();
 // cors is used when frontend & backend is on diffrence origin like 
 // frontend : 3000 & backend : 2000

@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import voter from "./voter.model";
+import voter from "./voter.model.js";
 
 const candidateSchema = new Schema({
     name: {

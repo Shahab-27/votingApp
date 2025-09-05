@@ -4,16 +4,15 @@ import { registerCandidate, getProfile, loginCandidate, modifyCandidate,
     deleteCandidate,giveVote,countVote,getAllCandidates
  } from "../controllers/candidates.controller.js";
 import verifyJWT from "../middlewares/auth.middleware.js";
-import { getProfile } from "../controllers/voter.controller.js";
+// import { getProfile } from "../controllers/voter.controller.js";
 
-const router = Router();
+const candidatesRouter = Router();
 
-router.route('/registerCandidate').post(registerCandidate)
-router.route('/loginCandidate').post(loginCandidate)
-router.route('/profile').get(verifyJWT,getProfile)
-router.route('/:candidateID').put(verifyJWT,modifyCandidate)
-router.route('/:candidateID').delete(verifyJWT,deleteCandidate)
-router.route('/vote/:candidateID').get(verifyJWT,giveVote)
-router.route('/vote/count').get(countVote)
-router.route('allCandidates').get(getAllCandidates)
-export default router
+candidatesRouter.route('/registerCandidate').post(registerCandidate)
+// candidatesRouter.route('/profile').get(verifyJWT,getProfile)
+candidatesRouter.route('/:candidateID').put(verifyJWT,modifyCandidate)
+candidatesRouter.route('/:candidateID').delete(verifyJWT,deleteCandidate)
+candidatesRouter.route('/vote/:candidateID').get(verifyJWT,giveVote)
+candidatesRouter.route('/vote/count').get(countVote)
+candidatesRouter.route('allCandidates').get(getAllCandidates)
+export default candidatesRouter

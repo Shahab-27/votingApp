@@ -176,3 +176,14 @@ const getAllCandidates = async(req,res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
+
+
+export {
+    registerCandidate,
+    modifyCandidate,
+    deleteCandidate,
+    giveVote,
+    countVote,
+    getAllCandidates
+};
