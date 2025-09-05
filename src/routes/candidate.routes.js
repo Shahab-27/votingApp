@@ -1,6 +1,8 @@
 import {Router} from "express";
 import mongoose from "mongoose";
-// import { registerCandidate, getProfile, loginUser, registerUser } from "../controllers/voter.controller.js";
+import { registerCandidate, getProfile, loginCandidate, modifyCandidate,
+    deleteCandidate,giveVote,countVote,getAllCandidates
+ } from "../controllers/candidates.controller.js";
 import verifyJWT from "../middlewares/auth.middleware.js";
 import { getProfile } from "../controllers/voter.controller.js";
 
