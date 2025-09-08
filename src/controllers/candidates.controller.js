@@ -16,7 +16,7 @@ const checkAdminRole = async (userId) => {
 const registerCandidate = async (req, res) => {
     try {
         // check if the user is Admin
-        const { data } = req.body
+        const data = req.body
         const isAdmin = await checkAdminRole(req.user.id);
         if (!isAdmin) {
             return res.status(403).json({
@@ -31,7 +31,7 @@ const registerCandidate = async (req, res) => {
             })
         }
     } catch (error) {
-        console.log(err);
+        console.log(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
@@ -164,8 +164,8 @@ const countVote = async (req, res) => {
 
 }
 
-const getAllCandidates = async(req,res) => {
-     try {
+const getAllCandidates = async (req, res) => {
+    try {
         // Find all candidates and select only the name and party fields, excluding _id
         const candidates = await Candidate.find({}, 'name party -_id');
 
