@@ -26,8 +26,8 @@ app.use(express.urlencoded({
 app.use(express.static("public"))
 app.use(cookieParser());
 
-app.use("/api/v1/voters", voterRouter);
-app.use("/api/v1/candidates", candidatesRouter);
+app.use("/api/v1", voterRouter);
+app.use("/api/v1", candidatesRouter);
 
 
 // http://localhost:8000/api/v1/register

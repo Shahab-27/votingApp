@@ -9,7 +9,7 @@ import { getProfile } from "../controllers/voter.controller.js";
 const candidatesRouter = Router();
 
 candidatesRouter.route('/registerCandidate').post(registerCandidate)
-candidatesRouter.route('/profile').get(verifyJWT,getProfile)
+candidatesRouter.route('/candidateprofile').get(verifyJWT,getProfile)
 candidatesRouter.route('/:candidateID').put(verifyJWT,modifyCandidate)
 candidatesRouter.route('/:candidateID').delete(verifyJWT,deleteCandidate)
 candidatesRouter.route('/vote/:candidateID').get(verifyJWT,giveVote)
