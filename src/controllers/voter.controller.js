@@ -3,42 +3,36 @@ import mongoose from "mongoose";
 import voter from "../models/voter.model.js";
 import generateToken from "../utils/generateToken.utils.js"
 
-
-
 const registerUser = async (req, res, next) => {
     try {
         const data = req.body;
-        //  check user is not a admin
-        const isAdminExist = await voter.exists({ role: "admin" })
-        if (data.role === "admin" && isAdminExist) {
-            return res.status(400).json({
-                error: "Admin already exists"
-            })
-        }
+
         //  aadhaar No is 12 digits
         if (isNaN(data.aadhaarNo) || data.aadhaarNo.toString().length !== 12) {
             return res.status(400).json({
                 error: "Aadhaar number is invalid"
             })
         }
+
         //  check whether the user with same aadhaarNo exist
         const userExist = await voter.exists({ aadhaarNo: data.aadhaarNo });
-
         if (userExist) {
             return res.status(400).json({
                 error: "User with same aadhaar exists"
             })
         }
 
-        // create new User
-        //  option 1 : const newUser = await voter.create(data); 
+        // create new User (defaults applied here)
         const newUser = await new voter(data).save();
 
-        // Why newUser.id instead of newUser._id ?? 
-
-        // newUser._id → MongoDB’s ObjectId type.
-
-        // newUser.id → Same value but automatically converted to a string by Mongoose.
+        //  check user is not a second admin
+        const isAdminExist = await voter.exists({ role: "admin" })
+        if (newUser.role === "admin" && isAdminExist) {
+            await voter.findByIdAndDelete(newUser._id);
+            return res.status(400).json({
+                error: "Admin already exists"
+            })
+        }
 
         const payload = {
             id: newUser.id
@@ -48,7 +42,8 @@ const registerUser = async (req, res, next) => {
         const token = generateToken(payload)
 
         res.status(200).json({
-            UserData: newUser, token: token
+            UserData: newUser,
+            token: token
         })
 
     } catch (error) {
@@ -56,6 +51,7 @@ const registerUser = async (req, res, next) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
 
 const loginUser = async (req, res, next) => {
     try {
