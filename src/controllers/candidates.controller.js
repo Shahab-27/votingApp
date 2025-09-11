@@ -103,7 +103,7 @@ const giveVote = async (req, res) => {
     try {
         const candidateId = req.params.candidateID
         const voterId = req.user.id;
-        if (checkAdminRole(voterId)) {
+        if (!checkAdminRole(voterId)) {
             return res.status(500).json({
                 message: "Admin has not rights for voting"
             })
@@ -111,7 +111,7 @@ const giveVote = async (req, res) => {
 
 
         const voterData = await voter.findById(voterId);
-        const CandidateData = await candidate.findById(CandidateId);
+        const CandidateData = await candidate.findById(candidateId);
 
         if (voterData.isVoted) {
             return res.status(500).json({
@@ -132,6 +132,7 @@ const giveVote = async (req, res) => {
         });
 
     } catch (error) {
+        console.error(error)
         res.status(500).json({
             error: "Internal server Error"
         })
