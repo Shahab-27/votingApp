@@ -38,9 +38,9 @@ const registerCandidate = async (req, res) => {
 
 const modifyCandidate = async (req, res) => {
     try {
-        const { data } = req.body;
-        const id = req.params.candidateID;
-        const isAdmin = checkAdminRole(id);
+       
+        const Candidateid = req.params.candidateID;
+        const isAdmin = await checkAdminRole(req.user.id);
 
         if (!isAdmin) {
             return res.status(403).json({
@@ -48,8 +48,8 @@ const modifyCandidate = async (req, res) => {
             })
         }
         const newCandidateData = req.body;
-        const response = await candidate.findByIdAndUpdate(id, newCandidateData, {
-            return: true,
+        const response = await candidate.findByIdAndUpdate(Candidateid, newCandidateData, {
+            new: true, // returns the updated document
             runValidators: true
         });
 
