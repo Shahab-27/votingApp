@@ -1,31 +1,26 @@
 {
   "name": "votingapp",
   "version": "1.0.0",
-  "description": "A backend based on Live Voting Application",
   "main": "index.js",
-  "type": "module",
   "scripts": {
+    "backend": "npm run dev --prefix backend",
+    "backend:start": "npm run start --prefix backend",
+
+    "frontend": "npm start --prefix frontend",
+
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Shahab-27/Voting-App.git"
+    "url": "git+https://github.com/Shahab-27/votingApp.git"
   },
-  "author": "Shahab Fardeen",
+  "keywords": [],
+  "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Shahab-27/Voting-App/issues"
+    "url": "https://github.com/Shahab-27/votingApp/issues"
   },
-  "homepage": "https://github.com/Shahab-27/Voting-App#readme",
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "body-parser": "^2.2.0",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.1",
-    "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.17.2",
-    "mongoose-aggregate-paginate-v2": "^1.1.4"
-  }
+  "homepage": "https://github.com/Shahab-27/votingApp#readme",
+  "description": ""
 }

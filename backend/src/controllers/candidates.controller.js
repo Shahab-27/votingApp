@@ -99,13 +99,13 @@ const deleteCandidate = async (req, res) => {
 
 
 const giveVote = async (req, res) => {
-    //only User can Voter
+    //only User can be a  Voter
     try {
         const candidateId = req.params.candidateID
         const voterId = req.user.id;
         if (!checkAdminRole(voterId)) {
             return res.status(500).json({
-                message: "Admin has not rights for voting"
+                message: "Admin has no rights for voting"
             })
         }
 
