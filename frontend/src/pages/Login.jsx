@@ -1,0 +1,72 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api/auth.api";
+import useAuth from "../auth/useAuth";
+
+const Login = () => {
+    const [aadhar, setAadhar] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+
+    const navigate = useNavigate();
+    const { setUser, setIsAuthenticated } = useAuth();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+
+        try {
+            const data = await loginUser({
+                aadhar,
+                password
+            });
+
+            // backend should return user info
+            setUser(data);
+            setIsAuthenticated(true);
+
+            // redirect based on role
+            if (data.role === "admin") {
+                navigate("/admin");
+            } else {
+                navigate("/profile");
+            }
+        } catch (err) {
+            setError("Invalid Aadhaar or password");
+        }
+    };
+
+    return (
+        <div style={{ maxWidth: "400px", margin: "50px auto" }}>
+            <h2>Login</h2>
+
+            {error && <p style={{ color: "red" }}>{error}</p>}
+
+            <form onSubmit={handleSubmit}>
+                <div>
+                    <label>Aadhaar Number</label>
+                    <input
+                        type="text"
+                        value={aadhar}
+                        onChange={(e) => setAadhar(e.target.value)}
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label>Password</label>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                </div>
+
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    );
+};
+
+export default Login;
