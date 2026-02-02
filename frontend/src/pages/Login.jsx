@@ -4,7 +4,7 @@ import { loginUser } from "../api/auth.api";
 import useAuth from "../auth/useAuth";
 
 const Login = () => {
-    const [aadhar, setAadhar] = useState("");
+    const [aadhaarNo, setAadhaarNo] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
@@ -17,7 +17,7 @@ const Login = () => {
 
         try {
             const data = await loginUser({
-                aadhar,
+                aadhaarNo,
                 password
             });
 
@@ -47,8 +47,8 @@ const Login = () => {
                     <label>Aadhaar Number</label>
                     <input
                         type="text"
-                        value={aadhar}
-                        onChange={(e) => setAadhar(e.target.value)}
+                        value={aadhaarNo}
+                        onChange={(e) => setAadhaarNo(e.target.value)}
                         required
                     />
                 </div>

@@ -4,10 +4,10 @@ import axiosInstance from "../api/axiosInstance";
 
 const Register = () => {
     const [form, setForm] = useState({
-        name: "",
-        aadhar: "",
+        username: "",
+        aadhaarNo: "",
         password: "",
-        role: "user"
+        role: "voter"
     });
     const [error, setError] = useState("");
     const navigate = useNavigate();
@@ -21,7 +21,7 @@ const Register = () => {
         setError("");
 
         try {
-            await axiosInstance.post("/registerCandidate", {
+            await axiosInstance.post("/register", {
                 data: form
             });
             navigate("/login");
@@ -37,12 +37,12 @@ const Register = () => {
             {error && <p className="error">{error}</p>}
 
             <form onSubmit={handleSubmit}>
-                <input name="name" placeholder="Name" onChange={handleChange} required />
-                <input name="aadhar" placeholder="Aadhar Number" onChange={handleChange} required />
+                <input name="username" placeholder="Name" onChange={handleChange} required />
+                <input name="aadhaarNo" placeholder="Aadhar Number" onChange={handleChange} required />
                 <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
 
                 <select name="role" onChange={handleChange}>
-                    <option value="user">User</option>
+                    <option value="voter">User</option>
                     <option value="admin">Admin</option>
                 </select>
 

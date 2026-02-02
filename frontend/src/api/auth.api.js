@@ -3,7 +3,7 @@ import axiosInstance from "./axiosInstance";
 // 🔐 Login user (JWT will be set in HTTP-only cookie by backend)
 export const loginUser = async (loginData) => {
     const response = await axiosInstance.post(
-        "/loginCandidate",
+        "/login",
         loginData
     );
     return response.data;

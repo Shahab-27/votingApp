@@ -5,14 +5,23 @@ import generateToken from "../utils/generateToken.utils.js"
 
 const registerUser = async (req, res, next) => {
     try {
-        const data = req.body;
+        const data = req.body.data;
+
 
         //  aadhaar No is 12 digits
-        if (isNaN(data.aadhaarNo) || data.aadhaarNo.toString().length !== 12) {
+        if (!data.aadhaarNo || !/^\d{12}$/.test(data.aadhaarNo)) {
             return res.status(400).json({
                 error: "Aadhaar number is invalid"
-            })
+            });
         }
+
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                error: "Password must be at least 6 characters and contain letters and numbers"
+            });
+        }
+
 
         //  check whether the user with same aadhaarNo exist
         const userExist = await voter.exists({ aadhaarNo: data.aadhaarNo });
@@ -91,7 +100,7 @@ const loginUser = async (req, res, next) => {
 
         // return token as response
         res.json({
-            token : token,
+            token: token,
             message: "User Logged In successfully",
             UserData: user
         })

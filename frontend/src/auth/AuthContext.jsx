@@ -1,7 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getProfile, logoutUser } from "../api/auth.api";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext({
+  user: null,
+  setUser: () => {}
+});
+
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);

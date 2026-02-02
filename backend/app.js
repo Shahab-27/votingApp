@@ -10,7 +10,7 @@ const app = express();
 // cors is used when frontend & backend is on diffrence origin like 
 // frontend : 3000 & backend : 2000
 app.use(cors({
-    origin : process.env.CORS_ORIGIN, 
+    origin : "http://localhost:5173", 
     // url like googel.com etc..whitelist
     credentials :true
 }))
