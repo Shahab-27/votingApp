@@ -3,61 +3,67 @@ import { getProfile, logoutUser } from "../api/auth.api";
 
 const AuthContext = createContext({
   user: null,
-  setUser: () => {}
+  isAuthenticated: false,
+  loading: true,
+  setUser: () => {},
+  setIsAuthenticated: () => {},
+  logout: () => {},
 });
 
-
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-    // 🔁 Rehydrate auth state on page refresh
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const data = await getProfile();
-                setUser(data);
-                setIsAuthenticated(true);
-            } catch (error) {
-                setUser(null);
-                setIsAuthenticated(false);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProfile();
-    }, []);
-
-    // 🚪 Logout handler
-    const logout = async () => {
-        try {
-            await logoutUser();
-        } catch (error) {
-            console.error("Logout failed");
-        } finally {
-            setUser(null);
-            setIsAuthenticated(false);
-        }
+  // 🔁 Rehydrate auth state (on app load / refresh)
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getProfile(); // backend validates cookie
+        setUser(data.user);              // ✅ ONLY user object
+        setIsAuthenticated(true);
+        console.log("AUTH REHYDRATED:", data.user);
+      } catch (error) {
+        console.log("NO ACTIVE SESSION");
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    return (
-        <AuthContext.Provider
-            value={{
-                user,
-                isAuthenticated,
-                loading,
-                setUser,
-                setIsAuthenticated,
-                logout
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
-    );
+    fetchProfile(); // ✅ ALWAYS call, server decides auth
+  }, []);
+
+  // 🚪 Logout handler
+  const logout = async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout failed");
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated,
+        loading,
+        setUser,
+        setIsAuthenticated,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
+// ✅ Custom hook
 export const useAuthContext = () => {
-    return useContext(AuthContext);
+  return useContext(AuthContext);
 };
