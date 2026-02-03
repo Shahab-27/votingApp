@@ -20,13 +20,12 @@ const Login = () => {
                 aadhaarNo,
                 password
             });
-
+            
             // backend should return user info
-            setUser(data);
+            setUser(data.user);
             setIsAuthenticated(true);
-
             // redirect based on role
-            if (data.role === "admin") {
+            if (data.user.role === "admin") {
                 navigate("/admin");
             } else {
                 navigate("/profile");
