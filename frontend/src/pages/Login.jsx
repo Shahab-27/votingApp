@@ -26,12 +26,16 @@ const Login = () => {
             // backend should return user info
             setUser(data.user);
             setIsAuthenticated(true);
-            // redirect based on role
-            if (data.role === "admin") {
-                navigate("/admin");
-            } else {
-                navigate("/profile");
-            }
+            // redirect based on role (role is in data.user, not data)
+            const role = data.user?.role;
+            // Defer navigate so React commits auth state before ProtectedRoute checks it
+            setTimeout(() => {
+                if (role === "admin") {
+                    navigate("/admin");
+                } else {
+                    navigate("/profile");
+                }
+            }, 0);
         } catch (err) {
             setError("Invalid Aadhaar or password");
         }
