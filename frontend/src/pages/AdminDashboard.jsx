@@ -5,11 +5,20 @@ const AdminDashboard = () => {
     const [candidates, setCandidates] = useState([]);
     const [name, setName] = useState("");
     const [party, setParty] = useState("");
+    const [address, setAddress] = useState("");
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(true);
 
     const fetchCandidates = async () => {
-        const res = await axiosInstance.get("/allCandidates");
-        setCandidates(res.data);
+        try {
+            const res = await axiosInstance.get("/allCandidates");
+            setCandidates(res.data || []);
+        } catch (err) {
+            setMessage("Failed to load candidates");
+            setCandidates([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -18,21 +27,26 @@ const AdminDashboard = () => {
 
     const addCandidate = async () => {
         try {
-            await axiosInstance.post("/addCandidate", {
-                data: { name, party }
+            setMessage("");
+            await axiosInstance.post("/registerCandidate", {
+                name,
+                party,
+                address: address || "N/A"
             });
             setName("");
             setParty("");
+            setAddress("");
             setMessage("Candidate added successfully");
             fetchCandidates();
         } catch (err) {
-            setMessage("Failed to add candidate");
+            setMessage(err.response?.data?.error || "Failed to add candidate");
         }
     };
 
     const deleteCandidate = async (id) => {
         try {
-            await axiosInstance.delete(`/delete/${id}`);
+            setMessage("");
+            await axiosInstance.delete(`/${id}`);
             fetchCandidates();
         } catch (err) {
             setMessage("Delete failed");
@@ -56,9 +70,15 @@ const AdminDashboard = () => {
                 value={party}
                 onChange={(e) => setParty(e.target.value)}
             />
+            <input
+                placeholder="Address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+            />
             <button onClick={addCandidate}>Add</button>
 
             <h3>All Candidates</h3>
+            {loading && <p>Loading...</p>}
             <ul>
                 {candidates.map((c) => (
                     <li key={c._id}>

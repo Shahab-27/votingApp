@@ -9,7 +9,7 @@ const Login = () => {
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
-    const { setUser, setIsAuthenticated } = useAuth();
+    const { setUser, setIsAuthenticated, setLoading } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,14 +21,10 @@ const Login = () => {
                 password
             });
 
-            console.log(data.user.role);
-            
-            // backend should return user info
             setUser(data.user);
             setIsAuthenticated(true);
-            // redirect based on role (role is in data.user, not data)
+            setLoading(false);
             const role = data.user?.role;
-            // Defer navigate so React commits auth state before ProtectedRoute checks it
             setTimeout(() => {
                 if (role === "admin") {
                     navigate("/admin");

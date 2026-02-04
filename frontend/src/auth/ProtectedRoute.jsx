@@ -6,8 +6,6 @@ const ProtectedRoute = ({ children, role }) => {
     // ✅ FIRST read from the correct context
     const { isAuthenticated, user, loading } = useAuthContext();
 
-    console.log("PROTECTED STATE:", { loading, isAuthenticated, user });
-
     // ⏳ Wait until auth state is resolved
     if (loading) {
         return <Loader />;

@@ -16,11 +16,11 @@ const AppRoutes = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/candidates" element={<Candidates />} />
 
-            {/* User protected routes */}
+            {/* Voter protected routes - backend uses role "voter" */}
             <Route
                 path="/profile"
                 element={
-                    <ProtectedRoute role="user">
+                    <ProtectedRoute role="voter">
                         <Profile />
                     </ProtectedRoute>
                 }
@@ -29,7 +29,7 @@ const AppRoutes = () => {
             <Route
                 path="/vote"
                 element={
-                    <ProtectedRoute role="user">
+                    <ProtectedRoute role="voter">
                         <Vote />
                     </ProtectedRoute>
                 }

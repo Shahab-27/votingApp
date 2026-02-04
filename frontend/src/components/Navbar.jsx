@@ -15,7 +15,7 @@ const Navbar = () => {
                 </>
             )}
 
-            {isAuthenticated && user?.role === "user" && (
+            {isAuthenticated && user?.role === "voter" && (
                 <>
                     <Link to="/profile">Profile</Link>{" | "}
                     <Link to="/vote">Vote</Link>{" | "}

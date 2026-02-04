@@ -1,16 +1,18 @@
 import axiosInstance from "./axiosInstance";
+import { setToken, clearToken } from "../services/token.service";
 
 export const loginUser = async (data) => {
   const res = await axiosInstance.post("/login", data);
+  const { token, user } = res.data;
+  if (token) setToken(token);
   return res.data;
 };
 
 export const getProfile = async () => {
-  console.log("🔥 getProfile API CALLED");
-  const res = await axiosInstance.get("/profile");
+  const res = await axiosInstance.get("/voterprofile");
   return res.data;
 };
 
 export const logoutUser = async () => {
-  await axiosInstance.post("/logout");
+  clearToken();
 };
