@@ -1,11 +1,12 @@
 import { Navigate } from "react-router-dom";
-import useAuth from "./useAuth";
+import { useAuthContext } from "./AuthContext";
 import Loader from "../components/Loader";
 
-
-
 const ProtectedRoute = ({ children, role }) => {
-    const { isAuthenticated, user, loading } = useAuth();
+    // ✅ FIRST read from the correct context
+    const { isAuthenticated, user, loading } = useAuthContext();
+
+    console.log("PROTECTED STATE:", { loading, isAuthenticated, user });
 
     // ⏳ Wait until auth state is resolved
     if (loading) {
@@ -17,11 +18,10 @@ const ProtectedRoute = ({ children, role }) => {
         return <Navigate to="/login" replace />;
     }
 
-    // ❌ Role mismatch (admin / user)
+    // ❌ Role mismatch
     if (role && user?.role !== role) {
         return <Navigate to="/unauthorized" replace />;
     }
-    
 
     // ✅ Allowed
     return children;

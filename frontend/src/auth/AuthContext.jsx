@@ -15,6 +15,8 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  console.log("AUTH CONTEXT RENDER → loading:", loading);
+
   // 🔁 Rehydrate auth state (on app load / refresh)
   useEffect(() => {
     const fetchProfile = async () => {
@@ -28,6 +30,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setIsAuthenticated(false);
       } finally {
+        console.log("🔥 SETTING LOADING FALSE");
         setLoading(false);
       }
     };

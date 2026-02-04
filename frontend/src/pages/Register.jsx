@@ -19,7 +19,7 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
-
+        
         try {
             await axiosInstance.post("/register", {
                 data: form
