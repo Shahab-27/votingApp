@@ -2,18 +2,15 @@ import jwt from "jsonwebtoken";
 
 
 const verifyJWT = async(req,res , next)=>{
-    const authHeader = req.headers.authorization
-    if(!authHeader){
-        return res.status(401).json({
-            error : "Auth header not found"
-        })
+    // Token from cookie (preferred) or Authorization header
+    let token = req.cookies?.token;
+    if (!token && req.headers.authorization) {
+        token = req.headers.authorization.replace("Bearer ", "");
     }
-
-    const token = authHeader.replace("Bearer ","");
-    if(!token){
+    if (!token) {
         return res.status(401).json({
-            error : "token not found"
-        })
+            error: "Auth required"
+        });
     }
 
     try {

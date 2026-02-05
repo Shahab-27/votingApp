@@ -6,7 +6,6 @@ import useAuth from "../auth/useAuth";
 const Vote = () => {
     const [candidates, setCandidates] = useState([]);
     const [message, setMessage] = useState("");
-    const [loading, setLoading] = useState(true);
 
     const { user, setUser } = useAuth();
 
@@ -14,11 +13,9 @@ const Vote = () => {
         const fetchCandidates = async () => {
             try {
                 const data = await getAllCandidates();
-                setCandidates(data);
+                setCandidates(data || []);
             } catch (err) {
-                setMessage("Failed to load candidates");
-            } finally {
-                setLoading(false);
+                setMessage("Failed to load candidates.");
             }
         };
 
@@ -28,33 +25,36 @@ const Vote = () => {
     const handleVote = async (candidateId) => {
         try {
             await voteForCandidate(candidateId);
-            setMessage("Vote recorded successfully");
+            setMessage("Vote recorded successfully.");
 
             // update local auth state
-            setUser({ ...user, isVoted: true });
+            if (user) {
+                setUser({ ...user, isVoted: true });
+            }
         } catch (err) {
-            setMessage("You have already voted or are not allowed to vote");
+            setMessage("You have already voted or are not allowed to vote.");
         }
     };
 
-    if (loading) return <p>Loading...</p>;
-
     return (
-        <div style={{ maxWidth: "600px", margin: "50px auto" }}>
-            <h2>Vote for Your Candidate</h2>
+        <div className="page page--narrow">
+            <h2 className="page__title">Cast your vote</h2>
 
-            {message && <p>{message}</p>}
+            {message && <p className="info">{message}</p>}
 
-            <ul>
-                {candidates.map((candidate, index) => (
-                    <li key={index} style={{ marginBottom: "10px" }}>
-                        <strong>{candidate.name}</strong> — {candidate.party}
-                        <br />
+            <ul className="list">
+                {candidates.map((candidate) => (
+                    <li key={candidate._id || candidate.aadhaarNo} className="list-item">
+                        <div className="list-item__primary">
+                            <strong>{candidate.name}</strong>
+                        </div>
+                        <div className="list-item__secondary">{candidate.party}</div>
                         <button
+                            className="button button--primary button--small"
                             onClick={() => handleVote(candidate._id)}
                             disabled={user?.isVoted}
                         >
-                            {user?.isVoted ? "Already Voted" : "Vote"}
+                            {user?.isVoted ? "Already voted" : "Vote"}
                         </button>
                     </li>
                 ))}
@@ -64,3 +64,4 @@ const Vote = () => {
 };
 
 export default Vote;
+

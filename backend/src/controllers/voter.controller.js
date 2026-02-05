@@ -15,8 +15,8 @@ const registerUser = async (req, res, next) => {
             });
         }
 
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
-        if (!passwordRegex.test(password)) {
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
+        if (!passwordRegex.test(data.password)) {
             return res.status(400).json({
                 error: "Password must be at least 6 characters and contain letters and numbers"
             });
@@ -50,6 +50,12 @@ const registerUser = async (req, res, next) => {
         // generating token
         const token = generateToken(payload)
 
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
         res.status(200).json({
             UserData: newUser,
             token: token
@@ -98,9 +104,16 @@ const loginUser = async (req, res, next) => {
         }
         const token = generateToken(payload);
 
-        // return token as response
+        // Set token in HTTP-only cookie (sent automatically with requests)
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+
         res.json({
-            token: token,
+            token,
             message: "User Logged In successfully",
             user
         })
@@ -165,11 +178,17 @@ const changePassword = async (req, res) => {
 
 }
 
-
+const logoutUser = async (req, res) => {
+    res.clearCookie("token");
+    res.status(200).json({ message: "Logged out" });
+};
 
 
 
 export {
     registerUser,
-    loginUser, getProfile, changePassword
+    loginUser,
+    getProfile,
+    changePassword,
+    logoutUser
 } 

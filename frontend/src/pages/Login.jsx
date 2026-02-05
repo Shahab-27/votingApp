@@ -1,15 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api/auth.api";
-import useAuth from "../auth/useAuth";
 
 const Login = () => {
     const [aadhaarNo, setAadhaarNo] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-
-    const navigate = useNavigate();
-    const { setUser, setIsAuthenticated, setLoading } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,31 +16,23 @@ const Login = () => {
                 password
             });
 
-            setUser(data.user);
-            setIsAuthenticated(true);
-            setLoading(false);
-            const role = data.user?.role;
-            setTimeout(() => {
-                if (role === "admin") {
-                    navigate("/admin");
-                } else {
-                    navigate("/profile");
-                }
-            }, 0);
+            // Use full page reload so auth state is rehydrated from token - avoids React timing issues
+            const path = data.user?.role === "admin" ? "/admin" : "/profile";
+            window.location.href = path;
         } catch (err) {
             setError("Invalid Aadhaar or password");
         }
     };
 
     return (
-        <div style={{ maxWidth: "400px", margin: "50px auto" }}>
-            <h2>Login</h2>
+        <div className="page container">
+            <h2 className="page__title">Login</h2>
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            {error && <p className="error">{error}</p>}
 
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Aadhaar Number</label>
+                <div className="form-group">
+                    <label>Aadhaar number</label>
                     <input
                         type="text"
                         value={aadhaarNo}
@@ -53,8 +40,7 @@ const Login = () => {
                         required
                     />
                 </div>
-
-                <div>
+                <div className="form-group">
                     <label>Password</label>
                     <input
                         type="password"
@@ -64,7 +50,7 @@ const Login = () => {
                     />
                 </div>
 
-                <button type="submit">Login</button>
+                <button type="submit" className="button--primary">Login</button>
             </form>
         </div>
     );

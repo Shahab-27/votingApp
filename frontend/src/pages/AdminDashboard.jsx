@@ -7,17 +7,14 @@ const AdminDashboard = () => {
     const [party, setParty] = useState("");
     const [address, setAddress] = useState("");
     const [message, setMessage] = useState("");
-    const [loading, setLoading] = useState(true);
 
     const fetchCandidates = async () => {
         try {
             const res = await axiosInstance.get("/allCandidates");
             setCandidates(res.data || []);
         } catch (err) {
-            setMessage("Failed to load candidates");
+            setMessage("Failed to load candidates.");
             setCandidates([]);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -25,7 +22,8 @@ const AdminDashboard = () => {
         fetchCandidates();
     }, []);
 
-    const addCandidate = async () => {
+    const addCandidate = async (e) => {
+        e?.preventDefault();
         try {
             setMessage("");
             await axiosInstance.post("/registerCandidate", {
@@ -36,10 +34,10 @@ const AdminDashboard = () => {
             setName("");
             setParty("");
             setAddress("");
-            setMessage("Candidate added successfully");
+            setMessage("Candidate added.");
             fetchCandidates();
         } catch (err) {
-            setMessage(err.response?.data?.error || "Failed to add candidate");
+            setMessage(err.response?.data?.error || "Failed to add candidate.");
         }
     };
 
@@ -49,46 +47,53 @@ const AdminDashboard = () => {
             await axiosInstance.delete(`/${id}`);
             fetchCandidates();
         } catch (err) {
-            setMessage("Delete failed");
+            setMessage(err.response?.data?.error || "Delete failed.");
         }
     };
 
     return (
-        <div style={{ maxWidth: "700px", margin: "50px auto" }}>
-            <h2>Admin Dashboard</h2>
+        <div className="page page--narrow">
+            <h2 className="page__title">Admin dashboard</h2>
 
-            {message && <p>{message}</p>}
+            {message && <p className={message.includes("added") ? "success" : "error"}>{message}</p>}
 
-            <h3>Add Candidate</h3>
-            <input
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-            />
-            <input
-                placeholder="Party"
-                value={party}
-                onChange={(e) => setParty(e.target.value)}
-            />
-            <input
-                placeholder="Address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-            />
-            <button onClick={addCandidate}>Add</button>
+            <section className="card">
+                <h3 className="section-title">Add candidate</h3>
+                <form onSubmit={addCandidate}>
+                    <div className="form-group">
+                        <input
+                            placeholder="Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <input
+                            placeholder="Party"
+                            value={party}
+                            onChange={(e) => setParty(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <input
+                            placeholder="Address (optional)"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                        />
+                    </div>
+                    <button type="submit" className="button--primary">Add</button>
+                </form>
+            </section>
 
-            <h3>All Candidates</h3>
-            {loading && <p>Loading...</p>}
-            <ul>
+            <h3 className="section-title">All candidates</h3>
+            <ul className="list">
                 {candidates.map((c) => (
-                    <li key={c._id}>
-                        {c.name} — {c.party}
-                        <button
-                            style={{ marginLeft: "10px" }}
-                            onClick={() => deleteCandidate(c._id)}
-                        >
-                            Delete
-                        </button>
+                    <li key={c._id} className="list-item">
+                        <div className="list-item__primary"><strong>{c.name}</strong></div>
+                        <div className="list-item__secondary">{c.party}</div>
+                        <button type="button" className="button--small" onClick={() => deleteCandidate(c._id)}>Delete</button>
                     </li>
                 ))}
             </ul>

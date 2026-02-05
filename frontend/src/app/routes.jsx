@@ -20,7 +20,7 @@ const AppRoutes = () => {
             <Route
                 path="/profile"
                 element={
-                    <ProtectedRoute role="user">
+                    <ProtectedRoute role="voter">
                         <Profile />
                     </ProtectedRoute>
                 }
@@ -29,7 +29,7 @@ const AppRoutes = () => {
             <Route
                 path="/vote"
                 element={
-                    <ProtectedRoute role="user">
+                    <ProtectedRoute role="voter">
                         <Vote />
                     </ProtectedRoute>
                 }

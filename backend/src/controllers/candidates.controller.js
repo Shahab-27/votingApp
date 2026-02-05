@@ -167,10 +167,8 @@ const countVote = async (req, res) => {
 
 const getAllCandidates = async (req, res) => {
     try {
-        // Find all candidates and select only the name and party fields, excluding _id
-        const candidates = await Candidate.find({}, 'name party -_id');
+        const candidates = await Candidate.find({}).select("name party");
 
-        // Return the list of candidates
         res.status(200).json(candidates);
     } catch (err) {
         console.error(err);

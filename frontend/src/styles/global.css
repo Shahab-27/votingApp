@@ -1,31 +1,119 @@
+:root {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --border: #e2e4e8;
+  --text: #1a1d21;
+  --text-muted: #5c6269;
+  --error: #b91c1c;
+  --success: #166534;
+  --focus: #2563eb;
+  --radius: 6px;
+  --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+  background-color: var(--bg);
+  min-height: 100vh;
 }
 
-.container {
-    max-width: 500px;
-    margin: 40px auto;
+#root {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
 }
 
-input, select, button {
-    display: block;
-    width: 100%;
-    margin: 10px 0;
-    padding: 8px;
-}
+a { color: var(--text); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
+.page { margin-top: 1.5rem; }
+.page--narrow { max-width: 560px; margin-left: auto; margin-right: auto; }
+.page__title { font-size: 1.35rem; font-weight: 600; margin: 0 0 1rem; color: var(--text); }
+
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; font-size: 0.875rem; font-weight: 500; color: var(--text); margin-bottom: 0.35rem; }
+
+input, select, button, textarea { font-family: inherit; font-size: 1rem; }
+input, select, textarea {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
 button {
-    cursor: pointer;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 500;
 }
+button:hover { background: #f1f2f4; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+.button--primary { background: var(--text); color: var(--surface); border-color: var(--text); }
+.button--primary:hover:not(:disabled) { background: #2d3136; }
+.button--small { padding: 0.35rem 0.75rem; font-size: 0.875rem; }
 
-.error {
-    color: red;
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  margin: 0 -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
+.nav__link { font-size: 0.9rem; color: var(--text-muted); }
+.nav__link:hover { color: var(--text); }
+.nav__logout { margin-left: auto; padding: 0.35rem 0.75rem; font-size: 0.875rem; }
+
+.list { list-style: none; margin: 0; padding: 0; }
+.list-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.list-item:last-child { border-bottom: none; }
+.list-item__primary { flex: 1; min-width: 0; }
+.list-item__secondary { color: var(--text-muted); font-size: 0.9rem; }
+
+.container { max-width: 420px; margin: 0 auto; }
+.error { color: var(--error); font-size: 0.9rem; margin-bottom: 0.75rem; }
+.info { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem; }
+.success { color: var(--success); font-size: 0.9rem; margin-bottom: 0.75rem; }
+.muted-text { color: var(--text-muted); font-size: 0.9rem; }
 
 .card {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: var(--surface);
 }
+.section-title { font-size: 1rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: var(--text); }
+.profile-grid { display: grid; gap: 0.75rem; margin-bottom: 1.5rem; }
+.profile-grid dt { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-muted); margin: 0; }
+.profile-grid dd { margin: 0 0 0.5rem; font-weight: 500; }
+.profile-grid dd:last-child { margin-bottom: 0; }

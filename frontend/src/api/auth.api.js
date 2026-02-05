@@ -1,11 +1,8 @@
 import axiosInstance from "./axiosInstance";
-import { setToken, clearToken } from "../services/token.service";
 
 export const loginUser = async (data) => {
   const res = await axiosInstance.post("/login", data);
-  const { token, user } = res.data;
-  if (token) setToken(token);
-  return res.data;
+  return res.data; // token in HTTP-only cookie, user in body
 };
 
 export const getProfile = async () => {
@@ -14,5 +11,10 @@ export const getProfile = async () => {
 };
 
 export const logoutUser = async () => {
-  clearToken();
+  await axiosInstance.post("/logout");
+};
+
+export const changePassword = async (data) => {
+  const res = await axiosInstance.post("/change-password", data);
+  return res.data;
 };

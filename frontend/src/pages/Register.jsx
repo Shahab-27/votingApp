@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 
 const Register = () => {
@@ -10,7 +9,6 @@ const Register = () => {
         role: "voter"
     });
     const [error, setError] = useState("");
-    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -21,32 +19,53 @@ const Register = () => {
         setError("");
         
         try {
-            await axiosInstance.post("/register", {
-                data: form
+            const res = await axiosInstance.post("/register", {
+                data: {
+                    ...form,
+                    aadhaarNo: String(form.aadhaarNo).replace(/\D/g, "").slice(0, 12) || form.aadhaarNo
+                }
             });
-            navigate("/login");
+            const { UserData } = res.data;
+            if (UserData) {
+                // Token set in HTTP-only cookie by backend; full reload to rehydrate auth
+                const path = UserData?.role === "admin" ? "/admin" : "/profile";
+                window.location.href = path;
+            } else {
+                window.location.href = "/login";
+            }
         } catch (err) {
-            setError("Registration failed");
+            const msg = err.response?.data?.error || err.response?.data?.message || "Registration failed";
+            setError(msg);
         }
     };
 
     return (
-        <div className="container">
-            <h2>Register</h2>
+        <div className="page container">
+            <h2 className="page__title">Register</h2>
 
             {error && <p className="error">{error}</p>}
 
             <form onSubmit={handleSubmit}>
-                <input name="username" placeholder="Name" onChange={handleChange} required />
-                <input name="aadhaarNo" placeholder="Aadhar Number" onChange={handleChange} required />
-                <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
-
-                <select name="role" onChange={handleChange}>
-                    <option value="voter">User</option>
-                    <option value="admin">Admin</option>
-                </select>
-
-                <button type="submit">Register</button>
+                <div className="form-group">
+                    <label>Name</label>
+                    <input name="username" placeholder="Full name" value={form.username} onChange={handleChange} required />
+                </div>
+                <div className="form-group">
+                    <label>Aadhaar number (12 digits)</label>
+                    <input name="aadhaarNo" placeholder="Aadhaar number" value={form.aadhaarNo} onChange={handleChange} required />
+                </div>
+                <div className="form-group">
+                    <label>Password (letters and numbers, min 6)</label>
+                    <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} required />
+                </div>
+                <div className="form-group">
+                    <label>Role</label>
+                    <select name="role" value={form.role} onChange={handleChange}>
+                        <option value="voter">Voter</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit" className="button--primary">Register</button>
             </form>
         </div>
     );

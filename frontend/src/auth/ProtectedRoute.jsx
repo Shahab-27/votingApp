@@ -1,27 +1,27 @@
 import { Navigate } from "react-router-dom";
 import { useAuthContext } from "./AuthContext";
-import Loader from "../components/Loader";
 
 const ProtectedRoute = ({ children, role }) => {
-    // ✅ FIRST read from the correct context
     const { isAuthenticated, user, loading } = useAuthContext();
 
-    // ⏳ Wait until auth state is resolved
-    if (loading) {
-        return <Loader />;
+    // While checking auth from backend, avoid flashing a loader screen.
+    // Just don't render anything until we know the auth result.
+    const hasValidAuth = isAuthenticated && user;
+    if (loading && !hasValidAuth) {
+        return null;
     }
 
-    // ❌ Not logged in
+    // Not logged in
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
 
-    // ❌ Role mismatch
+    // Role mismatch
     if (role && user?.role !== role) {
-        return <Navigate to="/unauthorized" replace />;
+        return <Navigate to="/login" replace />;
     }
 
-    // ✅ Allowed
+    // Allowed
     return children;
 };
 

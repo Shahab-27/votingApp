@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getProfile, logoutUser } from "../api/auth.api";
-import { getToken } from "../services/token.service";
 
 const AuthContext = createContext({
   user: null,
@@ -17,21 +16,14 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Rehydrate auth state on app load (only when we have a token)
+  // Rehydrate from cookie (sent automatically with withCredentials)
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = getToken();
-      if (!token) {
-        setUser(null);
-        setIsAuthenticated(false);
-        setLoading(false);
-        return;
-      }
       try {
         const data = await getProfile();
         setUser(data.user);
         setIsAuthenticated(true);
-      } catch (error) {
+      } catch {
         setUser(null);
         setIsAuthenticated(false);
       } finally {

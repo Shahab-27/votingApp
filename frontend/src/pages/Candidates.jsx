@@ -3,37 +3,38 @@ import { getAllCandidates } from "../api/candidate.api";
 
 const Candidates = () => {
     const [candidates, setCandidates] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
         const fetchCandidates = async () => {
             try {
                 const data = await getAllCandidates();
-                setCandidates(data);
+                setCandidates(data || []);
             } catch (err) {
                 setError("Failed to load candidates");
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchCandidates();
     }, []);
 
-    if (loading) return <p>Loading candidates...</p>;
-    if (error) return <p style={{ color: "red" }}>{error}</p>;
-
     return (
-        <div style={{ maxWidth: "600px", margin: "50px auto" }}>
-            <h2>Candidate List</h2>
+        <div className="page page--narrow">
+            <h2 className="page__title">Candidate list</h2>
 
-            {candidates.length === 0 && <p>No candidates available</p>}
+            {error && <p className="error">{error}</p>}
 
-            <ul>
-                {candidates.map((candidate, index) => (
-                    <li key={index}>
-                        <strong>{candidate.name}</strong> — {candidate.party}
+            {candidates.length === 0 && !error && (
+                <p className="muted-text">No candidates available.</p>
+            )}
+
+            <ul className="list">
+                {candidates.map((candidate) => (
+                    <li key={candidate._id || candidate.aadhaarNo} className="list-item">
+                        <div className="list-item__primary">
+                            <strong>{candidate.name}</strong>
+                        </div>
+                        <div className="list-item__secondary">{candidate.party}</div>
                     </li>
                 ))}
             </ul>
