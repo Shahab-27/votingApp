@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../api/auth.api";
+import useAuth from "../auth/useAuth";
 
 const Login = () => {
+    const navigate = useNavigate();
+    const { setUser, setIsAuthenticated } = useAuth();
     const [aadhaarNo, setAadhaarNo] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -16,19 +20,21 @@ const Login = () => {
                 password
             });
 
-            // Use full page reload so auth state is rehydrated from token - avoids React timing issues
             const path = data.user?.role === "admin" ? "/admin" : "/profile";
-            window.location.href = path;
+            // Update auth context and navigate within SPA
+            setUser(data.user);
+            setIsAuthenticated(true);
+            navigate(path, { replace: true });
         } catch (err) {
             setError("Invalid Aadhaar or password");
         }
     };
 
     return (
-        <div className="page container">
+        <div className="page auth-page">
             <h2 className="page__title">Login</h2>
 
-            {error && <p className="error">{error}</p>}
+            {error && <p className="alert alert--error">{error}</p>}
 
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
@@ -50,8 +56,13 @@ const Login = () => {
                     />
                 </div>
 
-                <button type="submit" className="button--primary">Login</button>
+                <button type="submit" className="btn btn--primary">Login</button>
             </form>
+
+            <div className="login-links">
+                <Link to="/forgot-password" className="login-links__left">Forgot password?</Link>
+                <Link to="/register" className="login-links__right">Not a voter?</Link>
+            </div>
         </div>
     );
 };

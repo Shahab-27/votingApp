@@ -18,10 +18,65 @@ const voterSchema = new Schema(
             required: true,
             unique: true
         },
+        email: {
+            type: String,
+        },
         role: {
             type: String,
-            enum: ['voter', 'admin'],
+            enum: ['voter', 'admin', 'candidate'],
             default: 'voter'
+        },
+        aadhaarDocUrl: {
+            type: String,
+        },
+        emailVerified: {
+            type: Boolean,
+            default: false,
+        },
+        emailVerificationCode: {
+            type: String,
+        },
+        resetPasswordCode: {
+            type: String,
+        },
+        resetPasswordExpiresAt: {
+            type: Date,
+        },
+        isApproved: {
+            type: Boolean,
+            default: false
+        },
+        approvalStatus: {
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            default: "pending",
+        },
+        approvalRemarks: {
+            type: String,
+        },
+        approvalReviewedAt: {
+            type: Date,
+        },
+        approvalReviewedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "voter",
+        },
+        paymentStatus: {
+            type: String,
+            enum: ["unpaid", "paid"],
+            default: "unpaid",
+        },
+        stripeCheckoutSessionId: {
+            type: String,
+        },
+        stripePaymentIntentId: {
+            type: String,
+        },
+        stripeChargeId: {
+            type: String,
+        },
+        stripeReceiptUrl: {
+            type: String,
         },
         isVoted: {
             type: Boolean,

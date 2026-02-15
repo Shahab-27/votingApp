@@ -4,24 +4,26 @@ import { useAuthContext } from "./AuthContext";
 const ProtectedRoute = ({ children, role }) => {
     const { isAuthenticated, user, loading } = useAuthContext();
 
-    // While checking auth from backend, avoid flashing a loader screen.
-    // Just don't render anything until we know the auth result.
-    const hasValidAuth = isAuthenticated && user;
-    if (loading && !hasValidAuth) {
-        return null;
-    }
-
     // Not logged in
     if (!isAuthenticated) {
+        console.warn("[ProtectedRoute] not authenticated, redirecting to /login", { role });
         return <Navigate to="/login" replace />;
     }
 
     // Role mismatch
-    if (role && user?.role !== role) {
-        return <Navigate to="/login" replace />;
+    if (role) {
+        const allowedRoles = Array.isArray(role) ? role : [role];
+        if (!allowedRoles.includes(user?.role)) {
+        console.warn("[ProtectedRoute] role mismatch, redirecting to /login", {
+                expectedRole: role,
+                actualRole: user?.role
+            });
+            return <Navigate to="/login" replace />;
+        }
     }
 
     // Allowed
+    console.log("[ProtectedRoute] access granted", { role, user });
     return children;
 };
 

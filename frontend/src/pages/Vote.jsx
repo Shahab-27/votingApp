@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { getAllCandidates } from "../api/candidate.api";
-import { voteForCandidate } from "../api/vote.api";
+import { voteForCandidate, removeVote } from "../api/vote.api";
 import useAuth from "../auth/useAuth";
 
 const Vote = () => {
     const [candidates, setCandidates] = useState([]);
     const [message, setMessage] = useState("");
-
+    const [removing, setRemoving] = useState(false);
     const { user, setUser } = useAuth();
+    const isVoter = user?.role === "voter";
 
     useEffect(() => {
         const fetchCandidates = async () => {
@@ -18,50 +19,114 @@ const Vote = () => {
                 setMessage("Failed to load candidates.");
             }
         };
-
         fetchCandidates();
     }, []);
 
     const handleVote = async (candidateId) => {
         try {
+            setMessage("");
             await voteForCandidate(candidateId);
             setMessage("Vote recorded successfully.");
-
-            // update local auth state
             if (user) {
                 setUser({ ...user, isVoted: true });
             }
         } catch (err) {
-            setMessage("You have already voted or are not allowed to vote.");
+            setMessage(err.response?.data?.error || "You have already voted or are not allowed to vote.");
         }
     };
 
+    const handleRemoveVote = async () => {
+        try {
+            setMessage("");
+            setRemoving(true);
+            await removeVote();
+            setMessage("Vote removed successfully.");
+            if (user) {
+                setUser({ ...user, isVoted: false });
+            }
+        } catch (err) {
+            setMessage(err.response?.data?.error || "Failed to remove vote.");
+        } finally {
+            setRemoving(false);
+        }
+    };
+
+    // Block admins and candidates from accessing the vote page
+    if (!isVoter) {
+        return (
+            <div className="page vote-page">
+                <h2 className="page__title">Cast your vote</h2>
+                <p className="muted-text">Only voters can access the voting page. Admins and candidates cannot vote.</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="page page--narrow">
+        <div className="page vote-page">
             <h2 className="page__title">Cast your vote</h2>
 
-            {message && <p className="info">{message}</p>}
+            {message && (
+                <p className={message.includes("success") ? "alert alert--success" : "alert alert--error"}>
+                    {message}
+                </p>
+            )}
 
-            <ul className="list">
-                {candidates.map((candidate) => (
-                    <li key={candidate._id || candidate.aadhaarNo} className="list-item">
-                        <div className="list-item__primary">
-                            <strong>{candidate.name}</strong>
+            {user?.isVoted && (
+                <div className="vote-page__remove">
+                    <span className="muted-text">You have already voted.</span>
+                    <button
+                        type="button"
+                        className="btn btn--danger"
+                        onClick={handleRemoveVote}
+                        disabled={removing}
+                    >
+                        {removing ? "Removing…" : "Remove your vote"}
+                    </button>
+                </div>
+            )}
+
+            {candidates.length === 0 && !message && (
+                <p className="muted-text">No candidates available to vote.</p>
+            )}
+
+            {candidates.map((candidate) => (
+                <div key={candidate._id} className="vote-card">
+                    <div className="vote-card__media">
+                        {candidate.candidateImage ? (
+                            <img
+                                src={candidate.candidateImage}
+                                alt={candidate.name}
+                                className="vote-card__avatar"
+                            />
+                        ) : (
+                            <div className="vote-card__avatar vote-card__avatar--placeholder">
+                                {candidate.name?.charAt(0)?.toUpperCase() || "?"}
+                            </div>
+                        )}
+                        {candidate.partyImage && (
+                            <img
+                                src={candidate.partyImage}
+                                alt=""
+                                className="vote-card__party-logo"
+                            />
+                        )}
+                        <div className="vote-card__info">
+                            <div className="vote-card__name">{candidate.name}</div>
+                            <p className="vote-card__party">{candidate.party}</p>
                         </div>
-                        <div className="list-item__secondary">{candidate.party}</div>
-                        <button
-                            className="button button--primary button--small"
-                            onClick={() => handleVote(candidate._id)}
-                            disabled={user?.isVoted}
-                        >
-                            {user?.isVoted ? "Already voted" : "Vote"}
-                        </button>
-                    </li>
-                ))}
-            </ul>
+                    </div>
+                    <button
+                        type="button"
+                        className="btn btn--primary"
+                        onClick={() => handleVote(candidate._id)}
+                        disabled={user?.isVoted}
+                    >
+                        {user?.isVoted ? "Already voted" : "Vote"}
+                    </button>
+                </div>
+            ))}
         </div>
     );
 };
 
 export default Vote;
-
