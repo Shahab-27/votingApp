@@ -6,6 +6,7 @@ import cors from "cors"
 import cookieParser  from "cookie-parser"
 import voterRouter from "./src/routes/voter.routes.js";
 import candidatesRouter from "./src/routes/candidate.routes.js";
+import feedRouter from "./src/routes/feed.routes.js";
 const app = express();
 // cors is used when frontend & backend is on diffrence origin like 
 // frontend : 3000 & backend : 2000
@@ -45,6 +46,7 @@ app.use(cookieParser());
 
 app.use("/api/v1", voterRouter);
 app.use("/api/v1", candidatesRouter);
+app.use("/api/v1", feedRouter);
 
 
 // http://localhost:8000/api/v1/register

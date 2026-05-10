@@ -5,10 +5,10 @@ import Chart from "chart.js/auto";
 const Candidates = () => {
     const [candidates, setCandidates] = useState([]);
     const [error, setError] = useState("");
-    const barCanvasRef = useRef(null);
     const doughnutCanvasRef = useRef(null);
-    const barChartRef = useRef(null);
+    const barChartCanvasRef = useRef(null);
     const doughnutChartRef = useRef(null);
+    const barChartInstanceRef = useRef(null);
 
     const getPaletteColor = (index) => {
         const colors = ["#0d9488", "#2563eb", "#f97316", "#a855f7", "#22c55e", "#e11d48", "#1d4ed8"];
@@ -18,24 +18,33 @@ const Candidates = () => {
     const updateCharts = (list) => {
         if (!Array.isArray(list)) return;
 
-        // Votes per candidate
-        if (barChartRef.current) {
+        // Bar chart: vote share % per candidate
+        if (barChartInstanceRef.current && barChartCanvasRef.current) {
+            const totalVotes = list.reduce((s, c) => s + (c.voteCount ?? 0), 0);
             const labels = list.map((c) => c.name);
-            const data = list.map((c) => c.voteCount ?? 0);
-            barChartRef.current.data.labels = labels;
-            barChartRef.current.data.datasets = [
+            const data = list.map((c) => {
+                const count = c.voteCount ?? 0;
+                return totalVotes > 0 ? Number(((count / totalVotes) * 100).toFixed(1)) : 0;
+            });
+            const backgroundColors = labels.map((_, idx) => {
+                const base = getPaletteColor(idx);
+                return base.endsWith(")") ? base : base + "33";
+            });
+
+            barChartInstanceRef.current.data.labels = labels;
+            barChartInstanceRef.current.data.datasets = [
                 {
-                    label: "Votes",
+                    label: "Vote share %",
                     data,
-                    backgroundColor: labels.map((_, idx) => getPaletteColor(idx) + "33"),
-                    borderColor: labels.map((_, idx) => getPaletteColor(idx)),
+                    backgroundColor: backgroundColors,
+                    borderColor: list.map((_, idx) => getPaletteColor(idx)),
                     borderWidth: 1,
                 },
             ];
-            barChartRef.current.update();
+            barChartInstanceRef.current.update();
         }
 
-        // Party share
+        // Party share doughnut
         if (doughnutChartRef.current) {
             const partyTotals = {};
             list.forEach((c) => {
@@ -61,26 +70,43 @@ const Candidates = () => {
         const fetchCandidates = async () => {
             try {
                 const data = await getAllCandidates();
-                setCandidates(data || []);
-                updateCharts(data || []);
+                const list = Array.isArray(data) ? data : [];
+                setCandidates(list);
+                updateCharts(list);
             } catch (err) {
                 setError("Failed to load candidates.");
             }
         };
         fetchCandidates();
+        const intervalId = setInterval(fetchCandidates, 5000);
+        return () => clearInterval(intervalId);
     }, []);
 
     useEffect(() => {
-        // Init charts once
-        if (barCanvasRef.current && !barChartRef.current) {
-            barChartRef.current = new Chart(barCanvasRef.current, {
+        if (barChartCanvasRef.current && !barChartInstanceRef.current) {
+            barChartInstanceRef.current = new Chart(barChartCanvasRef.current, {
                 type: "bar",
                 data: { labels: [], datasets: [] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { position: "bottom" } },
-                    scales: { y: { beginAtZero: true } },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Candidates",
+                            },
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: "Vote share %",
+                            },
+                        },
+                    },
                 },
             });
         }
@@ -92,9 +118,9 @@ const Candidates = () => {
             });
         }
         return () => {
-            if (barChartRef.current) {
-                barChartRef.current.destroy();
-                barChartRef.current = null;
+            if (barChartInstanceRef.current) {
+                barChartInstanceRef.current.destroy();
+                barChartInstanceRef.current = null;
             }
             if (doughnutChartRef.current) {
                 doughnutChartRef.current.destroy();
@@ -110,19 +136,19 @@ const Candidates = () => {
             <section className="card" style={{ marginBottom: 16 }}>
                 <h3 className="section-title">Live voting dashboard</h3>
                 <p className="muted-text" style={{ marginTop: 6 }}>
-                    Quick snapshot of votes per candidate and party share.
+                    Party distribution and vote share % per candidate.
                 </p>
                 <div className="admin-charts">
-                    <div className="admin-chart">
-                        <h4 className="section-title">Votes per candidate</h4>
-                        <div className="admin-chart__canvas">
-                            <canvas ref={barCanvasRef} aria-label="Votes per candidate" />
-                        </div>
-                    </div>
                     <div className="admin-chart">
                         <h4 className="section-title">Party vote share</h4>
                         <div className="admin-chart__canvas">
                             <canvas ref={doughnutCanvasRef} aria-label="Party vote share" />
+                        </div>
+                    </div>
+                    <div className="admin-chart">
+                        <h4 className="section-title">Vote share % per candidate</h4>
+                        <div className="admin-chart__canvas">
+                            <canvas ref={barChartCanvasRef} aria-label="Vote share per candidate" />
                         </div>
                     </div>
                 </div>
@@ -167,7 +193,15 @@ const Candidates = () => {
                             {candidate.address && <p><strong>Address:</strong> {candidate.address}</p>}
                             {candidate.age != null && <p><strong>Age:</strong> {candidate.age}</p>}
                             {candidate.mobile && <p><strong>Mobile:</strong> {candidate.mobile}</p>}
-                            {candidate.voteCount != null && <p><strong>Votes:</strong> {candidate.voteCount}</p>}
+                            <p>
+                                <strong>Vote share:</strong>{" "}
+                                {(() => {
+                                    const total = candidates.reduce((s, c) => s + (c.voteCount ?? 0), 0);
+                                    const count = candidate.voteCount ?? 0;
+                                    const pct = total > 0 ? ((count / total) * 100).toFixed(1) : "0";
+                                    return `${pct}%`;
+                                })()}
+                            </p>
                         </div>
                     </div>
                 ))}

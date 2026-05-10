@@ -2,6 +2,8 @@
 
 A robust backend for a **voting system** supporting secure user authentication, candidate management, and voting operations. Built with **Node.js**, **Express**, and **MongoDB**, it features **JWT authentication**, **role-based access control**, and is structured for scalability and maintainability.
 
+**Quick start:** From the project root run `npm run dev` to start both backend and frontend. Open [http://localhost:5173](http://localhost:5173) in your browser. (If you're in a subfolder, run `cd path\to\votingApp` first so you're in the root.)
+
 ---
 
 ## 📁 Project Structure
@@ -76,11 +78,25 @@ g:\votingApp
      JWT_SECRET=your_jwt_secret
      ```
 
-4. **Start the server:**
+4. **Backend env:** Create `backend/.env` with at least `MONGODB_URL`, `PORT` (e.g. 8000), `ACCESS_TOKEN_SECRET`, and other vars your app needs.
+
+5. **Start the app (recommended):** From the **project root** (`votingApp`), run:
+   ```sh
+   npm run dev
+   ```
+   This starts **both** the backend and the frontend:
+   - Backend: [http://localhost:8000](http://localhost:8000)
+   - Frontend: [http://localhost:5173](http://localhost:5173) — open this in the browser.
+
+   If you only run `npm run dev` from inside `frontend/`, the API will be unavailable (connection refused). Always use `npm run dev` from the root.
+
+6. **Optional – start backend only:**
    ```sh
    npm start
    ```
-   The server runs at: [http://localhost:8000](http://localhost:8000)
+   (Server runs at [http://localhost:8000](http://localhost:8000).)
+
+   On first run, the backend may seed dummy votes for existing candidates so the vote charts display data.
 
 ---
 

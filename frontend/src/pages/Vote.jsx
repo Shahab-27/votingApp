@@ -8,7 +8,7 @@ const Vote = () => {
     const [message, setMessage] = useState("");
     const [removing, setRemoving] = useState(false);
     const { user, setUser } = useAuth();
-    const isVoter = user?.role === "voter";
+    const canVote = user?.role === "voter" || user?.role === "candidate";
 
     useEffect(() => {
         const fetchCandidates = async () => {
@@ -51,12 +51,12 @@ const Vote = () => {
         }
     };
 
-    // Block admins and candidates from accessing the vote page
-    if (!isVoter) {
+    // Extra safety: block any unexpected roles (admins, etc.)
+    if (!canVote) {
         return (
             <div className="page vote-page">
                 <h2 className="page__title">Cast your vote</h2>
-                <p className="muted-text">Only voters can access the voting page. Admins and candidates cannot vote.</p>
+                <p className="muted-text">You are not allowed to access the voting page.</p>
             </div>
         );
     }

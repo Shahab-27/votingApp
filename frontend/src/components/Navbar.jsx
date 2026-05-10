@@ -32,6 +32,7 @@ const Navbar = () => {
         <nav className="nav">
             <Link to="/candidates" className="nav__brand">VoteNow </Link>
             <Link to="/candidates" className="nav__link">Candidates</Link>
+            <Link to="/feed" className="nav__link">Feed</Link>
             {isAuthenticated && user?.role === "voter" && (
                 <Link to="/vote" className="nav__link">Vote</Link>
             )}
@@ -60,13 +61,22 @@ const Navbar = () => {
                                 {user?.role === "admin" ? "Admin dashboard" : "Profile"}
                             </button>
                             {user?.role === "candidate" && (
-                                <button
-                                    type="button"
-                                    onClick={() => { setMenuOpen(false); navigate("/update-profile"); }}
-                                    className="nav__profile-item"
-                                >
-                                    Update profile
-                                </button>
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setMenuOpen(false); navigate("/update-profile"); }}
+                                        className="nav__profile-item"
+                                    >
+                                        Update profile
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setMenuOpen(false); navigate("/feed/add"); }}
+                                        className="nav__profile-item"
+                                    >
+                                        Add campaign
+                                    </button>
+                                </>
                             )}
                             <button
                                 type="button"

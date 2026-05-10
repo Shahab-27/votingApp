@@ -10,6 +10,9 @@ import Candidates from "../pages/Candidates";
 import Vote from "../pages/Vote";
 import AdminDashboard from "../pages/AdminDashboard";
 import CandidatePayment from "../pages/CandidatePayment";
+import Feed from "../pages/Feed";
+import AddCampaign from "../pages/AddCampaign";
+import UpdateProfile from "../pages/UpdateProfile";
 
 const AppRoutes = () => {
     return (
@@ -20,6 +23,7 @@ const AppRoutes = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/candidates" element={<Candidates />} />
+            <Route path="/feed" element={<Feed />} />
 
             {/* Protected routes */}
             <Route
@@ -54,6 +58,23 @@ const AppRoutes = () => {
                 element={
                     <ProtectedRoute role="admin">
                         <AdminDashboard />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/update-profile"
+                element={
+                    <ProtectedRoute role="candidate">
+                        <UpdateProfile />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/feed/add"
+                element={
+                    <ProtectedRoute role="candidate">
+                        <AddCampaign />
                     </ProtectedRoute>
                 }
             />

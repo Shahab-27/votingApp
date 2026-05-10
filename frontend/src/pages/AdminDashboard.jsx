@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import uploadImageViaBackend from "../api/cloudinary.api";
 import { updateCandidate } from "../api/candidate.api";
+import { getPendingCampaigns, approveCampaign, disapproveCampaign } from "../api/feed.api";
 import Chart from "chart.js/auto";
 
 const AdminDashboard = () => {
@@ -32,6 +33,13 @@ const AdminDashboard = () => {
         user: null,
     });
     const [remarksText, setRemarksText] = useState("");
+    const [pendingCampaigns, setPendingCampaigns] = useState([]);
+    const [campaignRemarksModal, setCampaignRemarksModal] = useState({
+        open: false,
+        action: null,
+        campaign: null,
+    });
+    const [campaignRemarksText, setCampaignRemarksText] = useState("");
 
     // Chart.js refs
     const lineChartCanvasRef = useRef(null);
@@ -78,23 +86,35 @@ const AdminDashboard = () => {
         }
     };
 
+    const fetchPendingCampaignsList = async () => {
+        try {
+            const list = await getPendingCampaigns();
+            setPendingCampaigns(Array.isArray(list) ? list : []);
+        } catch (err) {
+            setPendingCampaigns([]);
+        }
+    };
+
     const updateCharts = (candidateList) => {
         if (!candidateList) return;
 
-        // Update bar chart (votes per candidate)
+        // Update bar chart (vote share % per candidate)
         if (barChartInstanceRef.current && barChartCanvasRef.current) {
+            const totalVotes = candidateList.reduce((s, c) => s + (c.voteCount ?? 0), 0);
             const labels = candidateList.map((c) => c.name);
-            const data = candidateList.map((c) => c.voteCount ?? 0);
+            const data = candidateList.map((c) => {
+                const count = c.voteCount ?? 0;
+                return totalVotes > 0 ? Number(((count / totalVotes) * 100).toFixed(1)) : 0;
+            });
             const backgroundColors = labels.map((_, idx) => {
                 const base = getPaletteColor(idx);
-                // add alpha channel to base hex (fallback: reuse base)
                 return base.endsWith(")") ? base : base + "33";
             });
 
             barChartInstanceRef.current.data.labels = labels;
             barChartInstanceRef.current.data.datasets = [
                 {
-                    label: "Votes per candidate",
+                    label: "Vote share %",
                     data,
                     backgroundColor: backgroundColors,
                     borderColor: candidateList.map((_, idx) => getPaletteColor(idx)),
@@ -213,9 +233,10 @@ const AdminDashboard = () => {
                         },
                         y: {
                             beginAtZero: true,
+                            max: 100,
                             title: {
                                 display: true,
-                                text: "Votes",
+                                text: "Vote share %",
                             },
                         },
                     },
@@ -238,6 +259,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         fetchCandidates();
         fetchPendingCandidateUsers();
+        fetchPendingCampaignsList();
 
         // Poll for latest vote data so charts and list stay up to date
         const intervalId = setInterval(() => {
@@ -297,6 +319,53 @@ const AdminDashboard = () => {
             await disapproveCandidateUser(userId);
         }
         closeRemarksModal();
+    };
+
+    const approveCampaignPost = async (campaignId) => {
+        try {
+            setMessage("");
+            await approveCampaign(campaignId, campaignRemarksText);
+            setMessage("Campaign approved and added to feed.");
+            fetchPendingCampaignsList();
+        } catch (err) {
+            setMessage(err.response?.data?.error || "Approve failed.");
+        }
+    };
+
+    const disapproveCampaignPost = async (campaignId) => {
+        try {
+            setMessage("");
+            await disapproveCampaign(campaignId, campaignRemarksText);
+            setMessage("Campaign rejected.");
+            fetchPendingCampaignsList();
+        } catch (err) {
+            setMessage(err.response?.data?.error || "Reject failed.");
+        }
+    };
+
+    const openCampaignRemarksModal = (action, campaign) => {
+        setCampaignRemarksText("");
+        setCampaignRemarksModal({ open: true, action, campaign });
+    };
+
+    const closeCampaignRemarksModal = () => {
+        setCampaignRemarksModal({ open: false, action: null, campaign: null });
+        setCampaignRemarksText("");
+    };
+
+    const confirmCampaignRemarksAction = async () => {
+        if (!campaignRemarksModal.open || !campaignRemarksModal.campaign || !campaignRemarksModal.action) return;
+        const campaignId = campaignRemarksModal.campaign._id;
+        if (campaignRemarksModal.action === "reject" && !campaignRemarksText.trim()) {
+            setMessage("Please enter remarks for rejection.");
+            return;
+        }
+        if (campaignRemarksModal.action === "approve") {
+            await approveCampaignPost(campaignId);
+        } else {
+            await disapproveCampaignPost(campaignId);
+        }
+        closeCampaignRemarksModal();
     };
 
     const resetAddForm = () => {
@@ -469,9 +538,57 @@ const AdminDashboard = () => {
                 )}
             </section>
 
+            <section className="admin-card">
+                <h2 className="admin-card__title">Campaign approval requests</h2>
+                <p className="admin-subtitle">Campaign posts from candidates awaiting approval. Approve to show in the Feed.</p>
+                <div className="admin-table-wrap">
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Preview</th>
+                                <th>Candidate</th>
+                                <th>Caption</th>
+                                <th>Submitted</th>
+                                <th className="admin-table__actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {pendingCampaigns.map((c) => (
+                                <tr key={c._id}>
+                                    <td>
+                                        {c.image && (
+                                            <a href={c.image} target="_blank" rel="noreferrer" className="admin-table__meta">
+                                                <img src={c.image} alt="" className="admin-thumb admin-thumb--prev" style={{ maxWidth: 80, maxHeight: 60, objectFit: "cover" }} />
+                                            </a>
+                                        )}
+                                    </td>
+                                    <td>
+                                        <strong>{c.candidate?.name || "—"}</strong>
+                                        <span className="admin-table__meta"> {c.candidate?.party || ""}</span>
+                                    </td>
+                                    <td style={{ maxWidth: 200 }}>{c.caption ? (c.caption.length > 60 ? c.caption.slice(0, 60) + "…" : c.caption) : "—"}</td>
+                                    <td>{c.createdAt ? new Date(c.createdAt).toLocaleString() : "—"}</td>
+                                    <td className="admin-table__actions">
+                                        <button type="button" className="btn btn--primary btn--sm" onClick={() => openCampaignRemarksModal("approve", c)}>
+                                            Approve
+                                        </button>
+                                        <button type="button" className="btn btn--danger btn--sm" onClick={() => openCampaignRemarksModal("reject", c)}>
+                                            Reject
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                {pendingCampaigns.length === 0 && (
+                    <p className="admin-empty">No pending campaign approvals.</p>
+                )}
+            </section>
+
             {remarksModal.open && (
                 <div className="modal-overlay" onClick={closeRemarksModal}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                    <div className={`modal ${remarksModal.action === "reject" ? "modal--reject" : ""}`} onClick={(e) => e.stopPropagation()}>
                         <div className="modal__header">
                             <h3 className="modal__title">
                                 {remarksModal.action === "approve" ? "Approve candidate" : "Reject candidate"}
@@ -481,14 +598,16 @@ const AdminDashboard = () => {
                             </button>
                         </div>
                         <div className="modal__body">
-                            <p className="muted-text" style={{ marginTop: 0 }}>
-                                Candidate: <strong>{remarksModal.user?.username}</strong> ({remarksModal.user?.email || "—"})
-                            </p>
+                            <div className="modal-dialog-subject">
+                                <strong>Candidate</strong>
+                                <span>{remarksModal.user?.username} · {remarksModal.user?.email || "—"}</span>
+                            </div>
                             <div className="form-group">
-                                <label>
+                                <label htmlFor="remarks-candidate">
                                     Remarks {remarksModal.action === "reject" ? "(required)" : "(optional)"}
                                 </label>
                                 <textarea
+                                    id="remarks-candidate"
                                     rows={4}
                                     value={remarksText}
                                     onChange={(e) => setRemarksText(e.target.value)}
@@ -504,8 +623,61 @@ const AdminDashboard = () => {
                             <button type="button" className="btn btn--ghost" onClick={closeRemarksModal}>
                                 Cancel
                             </button>
-                            <button type="button" className="btn btn--primary" onClick={confirmRemarksAction}>
-                                Confirm
+                            <button
+                                type="button"
+                                className={`btn ${remarksModal.action === "reject" ? "btn--confirm-action" : "btn--primary"}`}
+                                onClick={confirmRemarksAction}
+                            >
+                                {remarksModal.action === "approve" ? "Approve" : "Reject"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {campaignRemarksModal.open && (
+                <div className="modal-overlay" onClick={closeCampaignRemarksModal}>
+                    <div className={`modal ${campaignRemarksModal.action === "reject" ? "modal--reject" : ""}`} onClick={(e) => e.stopPropagation()}>
+                        <div className="modal__header">
+                            <h3 className="modal__title">
+                                {campaignRemarksModal.action === "approve" ? "Approve campaign" : "Reject campaign"}
+                            </h3>
+                            <button type="button" className="modal__close" onClick={closeCampaignRemarksModal} aria-label="Close">
+                                ×
+                            </button>
+                        </div>
+                        <div className="modal__body">
+                            <div className="modal-dialog-subject">
+                                <strong>Campaign by</strong>
+                                <span>{campaignRemarksModal.campaign?.candidate?.name} · {campaignRemarksModal.campaign?.candidate?.party || "—"}</span>
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="remarks-campaign">
+                                    Remarks {campaignRemarksModal.action === "reject" ? "(required)" : "(optional)"}
+                                </label>
+                                <textarea
+                                    id="remarks-campaign"
+                                    rows={4}
+                                    value={campaignRemarksText}
+                                    onChange={(e) => setCampaignRemarksText(e.target.value)}
+                                    placeholder={
+                                        campaignRemarksModal.action === "reject"
+                                            ? "Reason for rejection (e.g. content inappropriate, unclear image)"
+                                            : "Optional note to candidate"
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <div className="modal__actions">
+                            <button type="button" className="btn btn--ghost" onClick={closeCampaignRemarksModal}>
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                className={`btn ${campaignRemarksModal.action === "reject" ? "btn--confirm-action" : "btn--primary"}`}
+                                onClick={confirmCampaignRemarksAction}
+                            >
+                                {campaignRemarksModal.action === "approve" ? "Approve" : "Reject"}
                             </button>
                         </div>
                     </div>
@@ -599,7 +771,7 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                     <div className="admin-chart">
-                        <h3 className="section-title">Votes per candidate</h3>
+                        <h3 className="section-title">Vote share % per candidate</h3>
                         <div className="admin-chart__canvas">
                             <canvas ref={barChartCanvasRef} aria-label="Votes per candidate" />
                         </div>

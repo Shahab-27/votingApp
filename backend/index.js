@@ -1,18 +1,22 @@
 // require('dotenv').config({path: './env'})
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 import connectDB from "./src/DB/server.js";
 import { app } from "./app.js";
-dotenv.config({
-    path: './.env'
-})
+import { runSeedIfNeeded } from "./scripts/seedDummyVotesLogic.js";
 
+dotenv.config({ path: "./.env" });
 
 connectDB()
-.then(() => {
-    app.listen(process.env.PORT || 8000, () => {
-        console.log(`⚙️ Server is running at port : ${process.env.PORT}`);
+    .then(() => {
+        // Seed dummy votes for charts when candidates have no votes (no-op if already have votes)
+        return runSeedIfNeeded().catch((err) => console.error("Dummy vote seed:", err.message || err));
     })
-})
-.catch((err) => {
-    console.log("MONGO db connection failed !!! ", err);
-})
+    .then(() => {
+        const port = process.env.PORT || 8000;
+        app.listen(port, () => {
+            console.log(`⚙️ Server is running at port : ${port}`);
+        });
+    })
+    .catch((err) => {
+        console.log("MONGO db connection failed !!! ", err);
+    });
